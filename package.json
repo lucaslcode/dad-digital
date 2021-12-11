@@ -1,0 +1,9 @@
+{
+  "name": "dad-digital",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@github.com:lucaslcode/dad-digital.git",
+  "author": "Lucas Levin <mail@lucas-levin.com>",
+  "license": "None",
+  "private": true
+}
