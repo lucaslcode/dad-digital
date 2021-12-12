@@ -1,0 +1,54 @@
+#postgres procedures
+
+#init
+declare
+	piece record;
+begin
+    select reset_at, reset_period into piece from pieces where pieces.id = _piece_id;
+    if now() > piece.reset_at + piece.reset_period * interval '1 second' then
+    	update pieces set reset_at = date_trunc('second', now());
+    end if;
+end;
+
+#listen
+declare
+	piece_timestamp timestamp;
+begin
+	select reset_at into piece_timestamp from pieces where pieces.id = _piece_id;
+	
+    if exists (select 1 from pieces inner join pings on pings.piece_id = pieces.id and pings.timestamp = piece_timestamp where pings.piece_id = _piece_id
+        and pings.secs = _secs) then
+      update pings
+        set count = count + 1
+        where pings.piece_id = _piece_id
+          and pings.secs = _secs
+          and pings."timestamp" = piece_timestamp;
+      
+    else
+      insert into pings (piece_id, secs, "count", "timestamp") values (_piece_id, _secs, 1, piece_timestamp);
+    end if;
+end;
+
+#listen_data
+select json_build_object('prev_max', (
+  select max(count)
+  from pings
+  where piece_id = _piece_id
+  and "timestamp" = (
+    select max("timestamp")
+    from pings
+    inner join pieces
+      on pings.piece_id = pieces.id
+    where pings.piece_id = _piece_id
+    and "timestamp" < "reset_at"
+  )
+),'counts', (
+  select json_agg(json_build_object(
+    'secs', secs, 'count', "count" 
+  ) order by secs)
+  from pings
+  inner join pieces
+    on pings.piece_id = pieces.id
+    and pings.timestamp = pieces.reset_at
+  where pings.piece_id = _piece_id
+));
