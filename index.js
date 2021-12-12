@@ -15,15 +15,18 @@ const specialTrackIndex = 6;
 const specialTrackModifierPercent = 0.5;
 const pingInterval = 2; //seconds
 const volumeInterval = 0.25; //seconds
+const textInterval = 1; //seconds
 const pieceId = 1;
 const minPrevMax = 20;
 const numTracks = files.length;
+const textContainer = document.getElementById("text-container");
 
 let client;
 let players;
 let playButton;
 let override = false;
 let totalTime = 0;
+let textIndex = -1;
 
 let rawListenData; //response from backend
 let listenData = []; //{secs: number, value: number}, count normalized 0-1 based on prev_max
@@ -31,6 +34,10 @@ let listenDataIndex = 0;
 
 window.addEventListener("load", function () {
   playButton = document.getElementById("play-button");
+  if (new URLSearchParams(window.location.search).has("override")) {
+    this.document.getElementById("override-slider-container").style.display =
+      "block";
+  }
   init();
 });
 
@@ -83,7 +90,8 @@ async function init() {
       .fill(override)
       .map((val, index) => ({ secs: index, value: override }));
   } else {
-    override = false;
+    if (searchParams.has("override")) override = true;
+    else override = false;
   }
 
   //load music
@@ -136,7 +144,10 @@ async function onPlayClick() {
   }
 
   const volumeIntervalHandle = setInterval(function () {
-    const currentValue = interpolateTime(Tone.Transport.seconds);
+    let currentValue;
+    if (override === false)
+      currentValue = interpolateTime(Tone.Transport.seconds);
+    else currentValue = document.getElementById("override-slider").value;
     const volumes = trackModifiers(currentValue, numTracks, specialTrackIndex);
     console.debug("Current value: ", currentValue, "Volumes: ", volumes);
     volumes.forEach((volume, index) => {
@@ -148,10 +159,27 @@ async function onPlayClick() {
     });
   }, volumeInterval * 1000);
 
+  const textIntervalHandle = setInterval(function () {
+    let currentValue;
+    if (override === false)
+      currentValue = interpolateTime(Tone.Transport.seconds);
+    else currentValue = document.getElementById("override-slider").value;
+
+    const index = Math.floor(numTracks * currentValue);
+    if (index !== textIndex) {
+      const origEl = document.getElementById("text-" + textIndex.toString());
+      if (origEl) origEl.classList.remove("visible");
+      textIndex = index;
+      const newEl = document.getElementById("text-" + textIndex.toString());
+      if (newEl) newEl.classList.add("visible");
+    }
+  }, textInterval * 1000);
+
   Tone.Transport.start();
   Tone.Transport.schedule(() => {
     Tone.Transport.stop();
     clearInterval(volumeIntervalHandle);
+    clearInterval(textIntervalHandle);
   }, totalTime);
   playButton.remove();
 }

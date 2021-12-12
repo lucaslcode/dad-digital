@@ -81,3 +81,31 @@ body {
 #play-button:enabled #loaded {
   display: block;
 }
+
+#override-slider-container {
+  display: none;
+  margin-top: 1rem;
+}
+
+#override-slider {
+  width: 200px;
+}
+
+#text-container {
+  position: relative;
+}
+
+#text-container > * {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  transition: opacity 1s;
+}
+
+#text-container > *:first-child {
+  position: static;
+}
+
+#text-container > .visible {
+  opacity: 1;
+}
