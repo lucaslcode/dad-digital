@@ -29,14 +29,15 @@ let totalTime = 0;
 let textIndex = -1;
 
 let rawListenData; //response from backend
-let listenData = []; //{secs: number, value: number}, count normalized 0-1 based on prev_max
+let listenData; //{secs: number, value: number}[], count normalized 0-1 based on prev_max
 let listenDataIndex = 0;
 
 window.addEventListener("load", function () {
   playButton = document.getElementById("play-button");
   if (new URLSearchParams(window.location.search).has("override")) {
-    this.document.getElementById("override-slider-container").style.display =
-      "block";
+    this.document
+      .getElementById("override-slider-container")
+      .classList.remove("hidden");
   }
   init();
 });
@@ -56,7 +57,7 @@ async function init() {
     throw initError;
   }
 
-  //returns {prev_max: int, counts?: {secs: number, count: number}[]}
+  //returns {prev_max: int, last_reset: iso time string, counts?: {secs: number, count: number}[]}
   const { data: rawListenData, error: listenDataError } = await client.rpc(
     "listen_data",
     {
@@ -70,6 +71,18 @@ async function init() {
 
   console.debug("Backend raw data: ", rawListenData);
 
+  const timeAgo = getTimeAgo(new Date(rawListenData.last_reset + "+00:00")); //so bad...
+
+  document.getElementById("last-rebuild").innerHTML =
+    "I was last rebuilt " + timeAgo + ".";
+
+  document.getElementById("title").classList.add("start");
+  setTimeout(() => {
+    document.getElementById("title").classList.add("hidden");
+    document.getElementById("intro-texts").classList.add("start");
+    document.getElementById("intro-texts").classList.remove("hidden");
+  }, 2000);
+
   //normalize listen data
   //this also applies a minimum
   if (rawListenData.counts) {
@@ -81,6 +94,11 @@ async function init() {
       ),
     }));
   }
+
+  const visitedTimes = window.localStorage.getItem("visited") || "0";
+  const numVisitedTimes = Number.parseInt(visitedTimes);
+  if (numVisitedTimes > 0) playButton.classList.add("ensure-visible");
+
   //support ?override=0.3 etc.
   const searchParams = new URLSearchParams(window.location.search);
   const rawOverride = searchParams.get("override");
@@ -93,6 +111,22 @@ async function init() {
     if (searchParams.has("override")) override = true;
     else override = false;
   }
+  if (numVisitedTimes > 9) {
+    override = true;
+    this.document
+      .getElementById("override-slider-container")
+      .classList.remove("hidden");
+  }
+
+  if (!listenData) {
+    listenData = [{ secs: 0, value: 0 }];
+  }
+
+  //add a second with a 0 value in case the count is suddenly 0 (which would have no data)
+  listenData.push({
+    secs: listenData[listenData.length - 1].secs + 1,
+    value: 0,
+  });
 
   //load music
   await new Promise(function (resolve) {
@@ -181,7 +215,12 @@ async function onPlayClick() {
     clearInterval(volumeIntervalHandle);
     clearInterval(textIntervalHandle);
   }, totalTime);
-  playButton.remove();
+  document.getElementById("intro-texts").remove();
+  document.getElementById("play-button").remove();
+  document.getElementById("text-container").classList.remove("hidden");
+  const visitedTimes = window.localStorage.getItem("visited") || "0";
+  const num = Number.parseInt(visitedTimes);
+  window.localStorage.setItem("visited", (num + 1).toString());
 }
 
 function handleError(error) {
@@ -225,4 +264,12 @@ function trackModifiers(value, numTracks, specialTrackIndex) {
     const percent = 1 - (value - startFade) / (endFade - startFade);
     return 20 * Math.log10(percent);
   });
+}
+
+function getTimeAgo(time) {
+  const now = new Date();
+  const hours = Math.floor((now.valueOf() - time.valueOf()) / (1000 * 60 * 60));
+  if (hours === 0) return "less than an hour ago";
+  if (hours === 1) return "an hour ago";
+  return hours.toString() + " hours ago";
 }
