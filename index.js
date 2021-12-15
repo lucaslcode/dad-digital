@@ -218,6 +218,7 @@ async function onPlayClick() {
     clearInterval(volumeIntervalHandle);
     clearInterval(textIntervalHandle);
     document.getElementById("text-container").style.opacity = 0;
+    document.getElementById("refresh-text").style.transition = "opacity 2s 2s";
     document.getElementById("refresh-text").style.opacity = 1;
   }, totalTime);
   document.getElementById("intro-texts").remove();
