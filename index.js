@@ -122,12 +122,6 @@ async function init() {
     listenData = [{ secs: 0, value: 0 }];
   }
 
-  //add a second with a 0 value in case the count is suddenly 0 (which would have no data)
-  listenData.push({
-    secs: listenData[listenData.length - 1].secs + 1,
-    value: 0,
-  });
-
   //load music
   await new Promise(function (resolve) {
     players = new Tone.Players(
@@ -143,6 +137,15 @@ async function init() {
     totalTime = Math.max(totalTime, runtime);
   });
   console.debug("Total time: ", totalTime);
+
+  //add a second with a 0 value in case the count is suddenly 0 (which would have no data)
+  const highestSecs = listenData[listenData.length - 1].secs;
+  if (highestSecs < totalTime - 5) {
+    listenData.push({
+      secs: listenData[listenData.length - 1].secs + 1,
+      value: 0,
+    });
+  }
 
   playButton.addEventListener("click", onPlayClick);
   playButton.disabled = false;
@@ -214,6 +217,8 @@ async function onPlayClick() {
     Tone.Transport.stop();
     clearInterval(volumeIntervalHandle);
     clearInterval(textIntervalHandle);
+    document.getElementById("text-container").style.opacity = 0;
+    document.getElementById("refresh-text").style.opacity = 1;
   }, totalTime);
   document.getElementById("intro-texts").remove();
   document.getElementById("play-button").remove();
