@@ -112,10 +112,7 @@ async function init() {
     else override = false;
   }
   if (numVisitedTimes > 9) {
-    override = true;
-    this.document
-      .getElementById("override-slider-container")
-      .classList.remove("hidden");
+    this.document.getElementById("cheat-link").classList.remove("hidden");
   }
 
   if (!listenData) {
