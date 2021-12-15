@@ -1,5 +1,3 @@
-/// TODO: Error handling, styling,
-
 const files = [
   "assets/0night.mp4",
   "assets/1construction.mp4",
@@ -222,7 +220,8 @@ async function onPlayClick() {
 
 function handleError(error) {
   Tone.Transport.stop();
-  console.error("Got an error!", error);
+  console.error(error);
+  document.getElementById("error").classList.remove("hidden");
 }
 
 function interpolateTime(time) {
