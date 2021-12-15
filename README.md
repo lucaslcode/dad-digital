@@ -22,6 +22,8 @@ This is happening at every moment of listening; thus the start of the work is li
 
 The musical focus is motet, yet it is nearly impossible to hear while all the layers are in place, and it is, ultimately, also eroded away.
 
+Additionally, there is a short phrase for each layer of erosion. In a sense, it forms a non-linear poem - it is likely that the first line displayed will correspond to a certain amound of erosion, and the following lines will progress backwards as the erosion lessens towards the end. However any order is possible - even showing only one line for the whole work.
+
 ## Background
 
 This work is a response to upcoming (commencing 2022) redevelopment of the Maison Dieu in Dover, England. I was very privileged to be given a behind-the-scenes tour of the ongoing preparatory research and discovery process before the restoration commences, and one aspect that made a particularly lasting impression was the rich layered history that can be found in such an ancient building.

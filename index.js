@@ -37,7 +37,12 @@ window.addEventListener("load", function () {
       .getElementById("override-slider-container")
       .classList.remove("hidden");
   }
-  init();
+  if (
+    !window.hasOwnProperty("AudioContext") &&
+    !window.hasOwnProperty("webkitAudioContext")
+  )
+    handleError(Error(), "Sorry, this browser is too old...");
+  else init();
 });
 
 async function init() {
@@ -109,7 +114,7 @@ async function init() {
     if (searchParams.has("override")) override = true;
     else override = false;
   }
-  if (numVisitedTimes > 9) {
+  if (numVisitedTimes > 9 && !override) {
     this.document.getElementById("cheat-link").classList.remove("hidden");
   }
 
@@ -218,10 +223,11 @@ async function onPlayClick() {
   window.localStorage.setItem("visited", (num + 1).toString());
 }
 
-function handleError(error) {
+function handleError(error, text) {
   Tone.Transport.stop();
   console.error(error);
   document.getElementById("error").classList.remove("hidden");
+  if (text) document.getElementById("error").innerHTML = "<p>" + text + "</p>";
 }
 
 function interpolateTime(time) {

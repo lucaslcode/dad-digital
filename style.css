@@ -270,7 +270,7 @@ a:visited {
 
 /* error */
 
-#error {
+#error:not(.hidden) {
   position: fixed;
   left: 0;
   right: 0;
@@ -279,4 +279,5 @@ a:visited {
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #150000;
 }
