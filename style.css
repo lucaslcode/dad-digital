@@ -264,7 +264,7 @@ a:visited {
       forwards;
 }
 
-#intro-texts.start + #play-button {
+#intro-texts.start ~ #play-button {
   animation: fadein var(--fade-time) calc(3 * var(--total-time)) both;
 }
 
