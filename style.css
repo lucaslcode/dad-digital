@@ -83,7 +83,8 @@ footer {
   position: absolute;
   right: 16px;
   bottom: 16px;
-  max-width: max(40%, 200px);
+  margin-left: 16px;
+  max-width: max(50%, 300px);
   text-align: right;
 }
 
